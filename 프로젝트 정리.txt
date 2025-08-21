@@ -1,0 +1,10 @@
+프로젝트 정리
+
+
+
+
+- 로컬 langfuse 접속
+* docker, node.js, vs코드 설치 필수
+깃에서 먼저 오픈소스 가져오기 : git clone https://github.com/langfuse/langfuse.git
+* 도커 먼저 실행 후 진행
+vs코드 ->  새 터미널 -> cd langfuse -> docker compose up(안될때 도커 한번 켜주기) -> docker에서  vs코드로 열려면 view configurations -> open in IDE / 로컬로 접속하려면 docker에서 laugfuse-web 밑에 포트로 열기
