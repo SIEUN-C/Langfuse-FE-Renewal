@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "ESNext",
+    // ✅ Vite/Node용
+    "moduleResolution": "Bundler",
+    "types": [
+      "node"
+    ],
+    // ✅ JS 구성 파일(vite.config.js)도 타입 서비스 적용
+    "allowJs": true,
+    "checkJs": false, // (원하면 true로 바꿔서 JS도 에러 체크)
+    // ✅ 기타 추천 옵션
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    // Linting
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": [
+    "vite.config.js"
+  ]
+}

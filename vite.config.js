@@ -1,26 +1,53 @@
-// import { defineConfig } from 'vite'
-// import react from '@vitejs/plugin-react'
-
-// // https://vite.dev/config/
-// export default defineConfig({
-//   plugins: [react()],
-// })
-
 // vite.config.js
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import * as path from "node:path";
+import viteTsconfigPaths from "vite-tsconfig-paths";
 
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path' // 'path' 모듈을 사용하기 위해 이 줄을 추가해야 합니다.
-
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: [
-      // 오류 로그에 나온 경로 별칭들을 여기에 모두 추가해줍니다.
-      { find: 'components', replacement: path.resolve(__dirname, 'src/components') },
-      { find: 'lib', replacement: path.resolve(__dirname, 'src/lib') },
-      // 다른 별칭이 있다면 여기에 추가...
-      // 예: { find: 'assets', replacement: path.resolve(__dirname, 'src/assets') },
-    ],
+  base: "/",
+  server: {
+    host: "0.0.0.0",
+    // 필요하면 포트 지정 (생략 시 5173)
+    // port: 5173,
+    /**
+     * ✅ 프록시 설정
+     * - /api            : Next.js API (chatCompletion 등)
+     * - /api/trpc       : tRPC 쿼리 (llmApiKey.all 등)
+     * - /auth (선택)    : next-auth 콜백/세션 라우트가 필요할 때
+     */
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/api/trpc": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+      // 필요 없으면 지워도 됨
+      "/auth": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
-})
+  plugins: [react(), viteTsconfigPaths()],
+  resolve: {
+    alias: {
+      Components: path.resolve(process.cwd(), "./src/Components"),
+      Library: path.resolve(process.cwd(), "./src/Library"),
+      Pages: path.resolve(process.cwd(), "./src/Pages"),
+      Communicator: path.resolve(process.cwd(), "./src/Communicator"),
+    },
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
+  },
+  optimizeDeps: {
+    // 필요한 경우만 사용
+    // exclude: [],
+  },
+});
