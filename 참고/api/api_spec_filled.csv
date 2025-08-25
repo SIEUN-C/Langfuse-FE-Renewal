@@ -1,0 +1,12 @@
+API 이름,사용자 행동(UX),Method,Endpoint,Path Params,Query Params,필수 헤더,요청 스키마(필드:타입:필수:제약),성공 응답 핵심 필드,페이지네이션/정렬,에러 케이스(상태:언제:메시지),부작용/도메인 규칙,UI 매핑(컴포넌트/화면),상태 UX(loading/empty/error),검증 시나리오(Postman),네트워크 관찰 메모(2일차),오픈 질문(2–4일차),책임자(A/B),우선순위,현재상태
+,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,
+Get Prompt by Name,프롬프트 상세 조회 (버전 또는 라벨로 식별),GET,/api/public/prompts,없음,"promptName, version?, label?",Authorization: Basic <secret>,promptName:string:필수 / version:number:옵션 / label:string:옵션,"id, name, version, labels, prompt, config",없음,404:Prompt 없음 / 400:version과 label 동시 지정 / 401:Unauthorized,라벨이 없으면 PRODUCTION_LABEL 기본,"PromptDetail, PromptSelectionDialog",Loading 스피너 / Prompt not found 메시지,promptName=testPrompt 호출 → 200 응답 확인,GET 호출시 캐싱 확인 필요,Resolved Prompt Graph와 어떻게 동작하는가?,A,상,완료
+Update Prompt Labels,프롬프트 버전에 라벨 추가/갱신,PUT,/api/internal/prompts/{promptName}/labels,promptName,없음,Authorization: Basic <secret>,projectId:string:필수 / promptVersion:number:필수 / newLabels:string[]:필수,업데이트된 Prompt 객체,없음,400:다른 Prompt가 라벨 의존중 / 404:Prompt 없음,라벨 제거 시 의존성 검증 필요,"SetPromptVersionLabels, PromptHistory",Saving... / Error 메시지,newLabels=[prod] 업데이트 요청,Transaction+Redis lock 확인,라벨 제거 UX는 어떻게 안내할지?,B,중,진행중
+Update Prompt Tags,프롬프트 모든 버전에 태그 일괄 갱신,PUT,/api/internal/prompts/{promptName}/tags,promptName,없음,Authorization: Basic <secret>,projectId:string:필수 / tags:string[]:필수,업데이트된 Prompt 객체 리스트,없음,404:Prompt 없음,모든 버전에 동일 태그 반영,"TagPromptPopover, PromptDetail",Saving... / Error 메시지,tags=['experiment'] 요청,없음,태그 이력 관리 필요성?,B,중,진행중
+Delete Prompt,프롬프트 전체 삭제,DELETE,/api/internal/prompts/{promptName},promptName,없음,Authorization: Basic <secret>,projectId:string:필수,삭제 성공 메시지,없음,404:Prompt 없음,삭제 후 모든 요청 에러 발생,DeletePrompt 버튼,Confirm 다이얼로그,DELETE /prompts/testPrompt 호출,없음,의존성 있는 경우 cascade?,A,상,완료
+Delete Prompt Version,프롬프트 특정 버전 삭제,DELETE,/api/internal/prompts/version/{promptVersionId},promptVersionId,없음,Authorization: Basic <secret>,projectId:string:필수,삭제 성공 메시지,없음,404:PromptVersion 없음,"해당 버전만 삭제, 전체 프롬프트는 유지",DeletePromptVersion 버튼,Confirm 다이얼로그,DELETE /prompts/version/123,없음,마지막 버전 삭제시 어떻게 처리?,B,중,진행중
+Protected Labels Settings,보호 라벨 추가/삭제 (관리자 기능),POST/DELETE,/api/internal/prompts/protected-labels,없음,없음,Authorization: Admin 권한 필요,projectId:string:필수 / label:string:필수,보호 라벨 리스트,없음,403:권한 없음,보호 라벨은 관리자/소유자만 수정 가능,ProtectedLabelsSettings,Add/Delete 후 UI 갱신,POST {label:'production'} → 200,없음,Protected label은 export/import 가능?,A,하,진행중

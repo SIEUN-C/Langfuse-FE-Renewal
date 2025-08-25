@@ -1,0 +1,371 @@
+.container {
+  color: #e2e8f0;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 48px); /* Full height minus ProjectHeader */
+  box-sizing: border-box;
+}
+
+/* 1. Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.title svg {
+  color: #94a3b8;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.windowInfo {
+  font-size: 13px;
+  color: #94a3b8;
+  padding: 6px 10px;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+}
+.actionBtn {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.actionBtn:hover {
+  background-color: #1e293b;
+}
+
+/* 2. Main Grid */
+.mainGrid {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 16px;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.panelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #020817;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+
+.card,
+.outputCard {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  position: relative; /* 자식 요소의 absolute 포지셔닝 기준 */
+}
+.cardHeader {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #94a3b8;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cardActions {
+  display: flex;
+  gap: 8px;
+}
+.iconActionBtn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+.iconActionBtn:hover {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+.cardBody {
+  padding: 14px;
+}
+.noApiKeyText {
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+.addLlmBtn {
+  background: transparent;
+  border: 1px solid #1e293b;
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.addLlmBtn:hover {
+  background-color: #1e293b;
+}
+
+.controlsBar {
+  display: flex;
+  gap: 8px;
+}
+.controlBtn {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.messageRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dragHandle,
+.removeBtn {
+  color: #64748b;
+  cursor: pointer;
+}
+.removeBtn:hover {
+  color: #e2e8f0;
+}
+.messageRole {
+  font-size: 13px;
+  color: #94a3b8;
+  width: 50px;
+}
+.messageInput {
+  flex-grow: 1;
+  background: #020817;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.addButtons {
+  display: flex;
+  gap: 8px;
+}
+.addBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+.addBtn:hover {
+  color: #e2e8f0;
+}
+
+.outputCard {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.outputBody {
+  flex-grow: 1;
+  padding: 14px;
+}
+
+/* 3. Footer */
+.footer {
+  padding-top: 16px;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.submitBtn {
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid #1e40af;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.submitBtn:hover {
+  filter: brightness(1.1);
+}
+/* 컨트롤 버튼 안의 뱃지 스타일 */
+.controlBtn .badge {
+  background-color: #334155;
+  color: #e2e8f0;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  margin-left: 6px;
+}
+
+/* 패널 내부 컨텐츠 스타일 */
+.toolSection {
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #e2e8f0;
+}
+
+.toolSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #020817;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 0 8px;
+}
+.toolSearch input {
+  background: none;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 8px 4px;
+  font-size: 13px;
+  width: 100%;
+}
+.toolSearch svg {
+  color: #64748b;
+}
+
+.toolMessage {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 16px 0;
+}
+
+.toolList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.toolItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.toolItem:hover {
+  background-color: #1e293b;
+}
+
+.toolInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+}
+
+.toolText {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolName {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.toolDesc {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+.editButton:hover {
+  color: #e2e8f0;
+}
+
+.toolButton {
+  background: transparent;
+  border: 1px solid #1e293b;
+  color: #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.toolButton:hover {
+  background-color: #1e293b;
+}
+
+.iconCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #94a3b8;
+}
+.iconCircle:hover {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}

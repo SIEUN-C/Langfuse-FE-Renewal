@@ -1,6 +1,12 @@
 프로젝트 정리
 
+```bash
+  # 최신 Langfuse 저장소 클론
+  git clone https://github.com/langfuse/langfuse.git
+  cd langfuse
 
+  # langfuse docker compose 실행
+  docker compose up
 
 
 - 로컬 langfuse 접속

@@ -1,0 +1,22 @@
+.panel {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px; /* 버튼과의 간격 */
+}
+
+.panelHeader {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.panelDescription {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+}

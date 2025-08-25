@@ -1,0 +1,112 @@
+/* src/pages/Tracing/Tracing.module.css */
+.container {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 0;
+  height: calc(100vh - 48px);
+  gap: 0;
+}
+
+.containerWithDetail {
+  grid-template-columns: minmax(600px, 2fr) 1fr;
+}
+
+.listSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.tabs {
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tabButton.active {
+  color: #f1f5f9;
+  border-bottom-color: rgba(241, 245, 249, 0.85);
+}
+
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ▼▼▼ 왼쪽 필터 그룹 스타일 추가 ▼▼▼ */
+.filterLeftGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contentArea {
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentArea :global(th),
+.contentArea :global(td) {
+  white-space: nowrap;
+}
+
+.cellText {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.traceLink {
+  color: #93c5fd;
+  text-decoration: none;
+}
+.traceLink:hover {
+  text-decoration: underline;
+}
+
+.observationCell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.starIcon, .favorited {
+  color: #64748b;
+  cursor: pointer;
+}
+.favorited {
+  color: #facc15;
+  fill: #facc15;
+}
+.tagsCell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tagPill {
+  background-color: #312e81; 
+  color: #e0e7ff;            
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}

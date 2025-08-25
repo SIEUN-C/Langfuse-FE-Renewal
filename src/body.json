@@ -1,0 +1,14 @@
+﻿{
+  "projectId": "cmekxpet50001qe07qeelt05h",
+  "messages": [
+    { "type": "system", "role": "system", "content": "You are a helpful assistant." },
+    { "type": "user",   "role": "user",   "content": "Tell me a short joke about databases." }
+  ],
+  "modelParams": {
+    "provider": "test",
+    "adapter": "openai",
+    "model": "Q",
+    "temperature": 0.7
+  },
+  "streaming": false
+}

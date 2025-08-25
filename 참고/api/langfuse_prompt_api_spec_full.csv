@@ -1,0 +1,31 @@
+Endpoint/Function,Description,Request,Response,Errors
+GET /api/public/v2/prompts,List prompts meta (with filter/pagination),"query: page, limit, name, version, label, tag, fromUpdatedAt, toUpdatedAt
+Auth: Basic (project scope)","200: {data:[{name,versions,labels,tags,lastUpdatedAt,lastConfig}], meta, pagination}","401/403 (auth), 429 (rate limit), 5xx"
+POST /api/public/v2/prompts,Create new prompt version,"body: {name, type(text|chat), prompt, labels[], tags[], config{}, commitMessage}
+Auth: Basic","201: {id, projectId, name, version, type, prompt, labels(+latest), tags, config, createdBy, createdAt}","400 (invalid type/duplicate/placeholder conflict), 401/403, 409 (dependency), 429, 5xx"
+GET /api/public/v2/prompts/{promptName},Fetch prompt by name (by version or label),"query: version OR label (default=production)
+Auth: Basic","200: {id, name, version, type, prompt, labels, tags, config, createdBy}","400 (both version+label), 404 (not found), 401/403, 429"
+PATCH /api/public/v2/prompts/{promptName}/{promptVersion},Update labels of a prompt version,"body: {newLabels:[]}
+Auth: Basic",200: updated Prompt object,"400 (latest forbidden), 404 (not found), 409 (dependency conflict), 401/403, 429"
+prompts.hasAny,Check if project has any prompts,input: {projectId},boolean,403 (no access)
+prompts.all,List prompts with filters & folder view,"input: PromptFilterOptions {filter, orderBy, pathPrefix, searchQuery, searchType, page, limit}","{prompts[], folders[], totalCount}",403
+prompts.count,Count prompts matching filters,"input: {projectId, filter, searchQuery, pathPrefix}",{count},403
+prompts.metrics,Get usage metrics for prompt names,"input: {projectId, promptNames[]}",{metrics},403
+prompts.byId,Get prompt by id,"input: {projectId, id}",{prompt},"404,403"
+prompts.create,Create new version,"input: {projectId, name, type, prompt, config, labels, tags, commitMessage}",{prompt},"400,403,409"
+prompts.duplicatePrompt,Duplicate prompt,"input: {projectId, promptId, name, isSingleVersion}",{prompt},"400,403"
+prompts.filterOptions,"Filter sources (names, labels, tags)",input: {projectId},"{names[], labels[], tags[]}",403
+prompts.delete,Delete prompt (all versions),"input: {projectId, promptName}",ok,"403,409"
+prompts.deleteVersion,Delete prompt version,"input: {projectId, promptVersionId}",ok,"403,409"
+prompts.setLabels,Set labels for a version (replace all),"input: {projectId, promptName, promptVersion, newLabels[]}",Prompt,"403,409"
+prompts.allLabels,List all labels,input: {projectId},{labels[]},403
+prompts.allNames,List all prompt names,input: {projectId},{names[]},403
+prompts.getPromptLinkOptions,Inline prompt reference options,input: {projectId},"{name, versions[], labels[]}[]",403
+prompts.updateTags,Update tags across all versions,"input: {projectId, promptName, tags[]}",ok,403
+prompts.allPromptMeta,List all prompt versions (meta),input: {projectId},{versions[]},403
+prompts.allVersions,Get all versions of a prompt,"input: {projectId, name}",{promptVersions[]},403
+prompts.versionMetrics,Get metrics per version,"input: {projectId, name}",{metrics},403
+prompts.resolvePromptGraph,Resolve prompt graph with inline refs,"input: {projectId, promptId}","{graph, resolvedPrompt}",403
+prompts.getProtectedLabels,Get protected labels,input: {projectId},{labels[]},403
+prompts.addProtectedLabel,Add protected label,"input: {projectId, label}",ok,403
+prompts.removeProtectedLabel,Remove protected label,"input: {projectId, label}",ok,403
