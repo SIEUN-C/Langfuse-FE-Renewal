@@ -1,0 +1,25 @@
+﻿API 이름,카테고리,Method,Path (REST 스타일),요청 데이터(입력),응답 데이터(출력),권한/제약,에러 코드/상황,tRPC 명칭,비고
+hasAny,Public,GET,/prompts/hasAny,{ projectId },true | false,prompts:read,401/403,prompts.hasAny,tRPC: prompts.hasAny
+목록(all),Public,GET,/prompts,"{ projectId, filter[], orderBy, limit, page, pathPrefix?, searchQuery?, searchType? }","{ prompts:[], totalCount }",prompts:read,"400 invalid limit, 401/403",prompts.all,tRPC: prompts.all; 검색/정렬/페이지네이션
+총계(count),Public,GET,/prompts/count,"{ projectId, searchQuery?, searchType?, pathPrefix?, filter? }",{ totalCount:number },prompts:read,401/403,prompts.count,tRPC: prompts.count
+메트릭(metrics),Public,GET,/prompts/metrics,"{ projectId, promptNames[] }","[ { promptName, observationCount } ]",prompts:read,401/403,prompts.metrics,tRPC: prompts.metrics
+필터 옵션,Public,GET,/prompts/filter-options,{ projectId },"{ name: string[], labels: string[], tags: string[] }",prompts:read,401/403,prompts.filterOptions,tRPC: prompts.filterOptions
+라벨 전체,Public,GET,/prompts/labels,{ projectId },string[],prompts:read,401/403,prompts.allLabels (내부 대안: /internal/prompts/all-labels),tRPC: prompts.allLabels (내부 대안: /internal/prompts/all-labels)
+이름 전체,Public,GET,/prompts/names,"{ projectId, type? }","[ { id, name } ]",prompts:read,401/403,prompts.allNames,tRPC: prompts.allNames
+링크 옵션,Public,GET,/prompts/link-options,{ projectId },"[ { name, versions[], labels[] } ]",prompts:read,401/403,prompts.getPromptLinkOptions,tRPC: prompts.getPromptLinkOptions; 텍스트 프롬프트만
+생성(create),Public,POST,/prompts,"{ projectId, name, type(""text""|""chat""), prompt(string|chat[]), config?, labels?, tags?, variables?, note?, metadata?, commitMessage? }",Prompt (새 버전),prompts:CUD (+ 보호라벨 시 promptProtectedLabels:CUD),"400(스키마/충돌), 401/403",prompts.create,tRPC: prompts.create
+복제(duplicate),Public,POST,/prompts/:id/duplicate,"{ projectId, promptId, name, isSingleVersion }",Prompt,prompts:CUD,"404 대상 없음, 400 이름 중복",prompts.duplicatePrompt,tRPC: prompts.duplicatePrompt; F12: /api/trpc/prompts.duplicatePrompt
+삭제(delete),Public,DELETE,/prompts?name=...,"{ projectId, promptName }",{} 또는 { success:true },prompts:CUD (+ 보호라벨 검증),"403 보호라벨, 409 참조 중",,이름 단위 전체 삭제; Redis 락/무효화/웹훅
+버전 삭제,Public,DELETE,/prompts/versions/:id,"{ projectId, promptVersionId }",{} 또는 { success:true },prompts:CUD,"404, 403(보호라벨), 409(참조 중)",prompts.deleteVersion (F12에서는 POST로 호출),tRPC: prompts.deleteVersion (F12에서는 POST로 호출)
+라벨 치환(setLabels),Public,PUT,/prompts/:promptId/labels,"{ projectId, promptId, labels[] }",{},prompts:CUD + 보호라벨 권한,"404, 403, 409(참조 중)",prompts.setLabels,tRPC: prompts.setLabels; **치환** (합집합 아님)
+태그 교체(updateTags),Public,PATCH,/prompts/:name/tags,"{ projectId, name, tags[] }",{},objects:tag (예),-,prompts.updateTags,tRPC: prompts.updateTags; 모든 버전에 동일 태그
+버전 목록,Public,GET,/prompts/{name}/versions,"{ projectId, page, limit }","{ versions:[], totalCount }",prompts:read,401/403,prompts.allVersions,tRPC: prompts.allVersions
+그래프 해석,Public,GET,/prompts/:id/graph,"{ projectId, promptId }","{ resolvedPrompt, graph }",prompts:read,401/403,prompts.resolvePromptGraph,tRPC: prompts.resolvePromptGraph
+단건 조회(이름 기준),Public,GET,/prompts/{promptName},Query: version?(number) OR label?(string) (동시 지정 금지),Prompt(해당 1버전),인증/레이트리밋,"400(version+label), 404, 401/403, 429",,둘 다 없으면 기본 label=production
+메타 집계 조회 A,Public,GET,/prompts,"GetPromptsMetaSchema (namespace?, tags?, labels? 등)","{ total, namespaces[], tags[], labels[] }",인증/레이트리밋,400/401/403/429,,목록이 아닌 **메타**
+메타 집계 조회 B,Public,GET,/prompts,"page, limit, name?, version?, label?, tag?, fromUpdatedAt?, toUpdatedAt?","{ data:[{ name, versions[], labels[], tags[], lastUpdatedAt, lastConfig }], meta, pagination }",인증/레이트리밌,400/401/403/429,,meta + pagination 동시 제공 (하위호환)
+byId 조회,Public,GET,/prompts/byId/:id,"{ projectId, id }",Prompt,prompts:read,404,,F12 직접 노출 X
+보호 라벨 목록,Internal,GET,/internal/prompts/protected-labels,{ projectId },string[],prompts:read + prompt-protected-labels,401/403,,tRPC 기반 내부 기능
+보호 라벨 추가,Internal,POST,/internal/prompts/protected-labels,"{ projectId, label }","{ id, projectId, label }",promptProtectedLabels:CUD + prompt-protected-labels,"400(label=""latest""), 401/403",,"""latest"" 금지"
+보호 라벨 제거,Internal,DELETE,/internal/prompts/protected-labels/{label},{ projectId },{ success:true },promptProtectedLabels:CUD + prompt-protected-labels,"404, 401/403",,지정 라벨만 제거
+프롬프트 복제(내부),Internal,POST,/internal/prompts/duplicate,"{ projectId, promptId, name, isSingleVersion }","{ id, name, version, labels[], tags[] }","인증 필요, 이름 유일성","400 스키마/중복 이름, 401/403",,새 프롬프트 생성 후 페이지 이동; 내부 경로

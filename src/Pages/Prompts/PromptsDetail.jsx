@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styles from './PromptsDetail.module.css';
@@ -15,7 +17,7 @@ import {
   Tag,
 } from 'lucide-react';
 import DuplicatePromptModal from './DuplicatePromptModal.jsx';
-import { fetchPromptVersions, createNewPromptVersion } from './promptsApi.js';
+import { fetchPromptVersions, createNewPromptVersion } from './PromptsDetailApi.js';
 
 // --- 메인 컴포넌트 ---
 export default function PromptsDetail() {
