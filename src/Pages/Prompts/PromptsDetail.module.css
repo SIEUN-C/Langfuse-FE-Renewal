@@ -344,3 +344,49 @@
   color: #64748b;
   font-size: 14px;
 }
+
+
+/* src/Pages/Prompts/PromptsDetail.module.css */
+
+/* ... (기존의 모든 CSS 스타일은 그대로 둡니다) ... */
+
+
+
+/* ▼▼▼ 아래 내용을 파일 맨 끝에 추가해주세요 ▼▼▼ */
+
+/* Playground 드롭다운을 위한 스타일 */
+.playgroundDropdownContainer {
+  position: relative; /* 드롭다운 메뉴의 기준점이 됩니다 */
+  display: inline-block;
+}
+
+.playgroundDropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px); /* 버튼 바로 아래에 위치 */
+  right: 0;
+  background-color: #0f172a; /* 어두운 배경 */
+  border: 1px solid #334155;
+  border-radius: 6px;
+  width: 160px; /* 드롭다운 너비 */
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 4px;
+}
+
+.playgroundDropdownItem {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+}
+
+.playgroundDropdownItem:hover {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
