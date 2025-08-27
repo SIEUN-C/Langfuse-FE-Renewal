@@ -136,3 +136,24 @@ export const fetchPromptVersions = async (promptName) => {
         };
     }).sort((a, b) => b.id - a.id);
 };
+
+/**
+ * [tRPC API 직접 호출] 프롬프트의 태그를 업데이트합니다.
+ * @param {string} promptName - 태그를 수정할 프롬프트의 이름
+ * @param {string[]} tags - 새로운 태그 목록 (배열)
+ * @param {string} projectId - 프로젝트 ID
+ */
+export const updatePromptTags = async (promptName, tags, projectId) => {
+  try {
+    await axios.post('/api/trpc/prompts.updateTags', {
+      json: {
+        projectId,
+        name: promptName,
+        tags,
+      },
+    });
+  } catch (error) {
+    console.error(`Failed to update tags for prompt ${promptName}:`, error);
+    throw new Error(error.response?.data?.error?.message || 'Failed to update tags.');
+  }
+};
