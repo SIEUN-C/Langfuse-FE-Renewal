@@ -64,14 +64,26 @@ export default function Layout() {
     { label: "Settings", icon: <Settings size={18} />, path: "/settings" },
   ];
 
-  const navClass = ({ isActive }) =>
-    `${styles.menuItem} ${isActive ? styles.active : ""} ${collapsed ? styles.iconOnly : ""}`.trim();
+  // <<< START: 수정된 부분 >>>
+  // Playground 경로를 위한 특별 로직을 추가합니다.
+  const isPathActive = (path) => {
+    if (path === "/playground") {
+      return location.pathname.includes("/playground");
+    }
+    // 기존 로직은 `NavLink`의 `isActive`에 의존하거나 `startsWith`를 사용합니다.
+    return !!matchPath({ path, end: path === "/" }, location.pathname) ||
+           (path !== "/" && location.pathname.startsWith(path));
+  };
+
+  const navClass = (path) => ({ isActive }) => {
+    const finalIsActive = isActive || isPathActive(path);
+    return `${styles.menuItem} ${finalIsActive ? styles.active : ""} ${collapsed ? styles.iconOnly : ""}`.trim();
+  };
 
   const sectionActive = (section) =>
-    section.items.some(({ path }) =>
-      !!matchPath({ path, end: path === "/" }, location.pathname) ||
-      (path !== "/" && location.pathname.startsWith(path))
-    );
+    section.items.some(({ path }) => isPathActive(path));
+  // <<< END: 수정된 부분 >>>
+
 
   const pageTitle = useMemo(() => {
     const p = location.pathname;
@@ -140,7 +152,9 @@ export default function Layout() {
                   <NavLink
                     key={item.label}
                     to={item.path}
-                    className={navClass}
+                    // <<< START: 수정된 부분 >>>
+                    className={navClass(item.path)}
+                    // <<< END: 수정된 부분 >>>
                     end={item.path === "/"}
                     title={collapsed ? item.label : undefined}
                     aria-label={collapsed ? item.label : undefined}
@@ -164,7 +178,9 @@ export default function Layout() {
               <NavLink
                 key={item.label}
                 to={item.path}
-                className={navClass}
+                // <<< START: 수정된 부분 >>>
+                className={navClass(item.path)}
+                // <<< END: 수정된 부분 >>>
                 end={false}
                 title={collapsed ? item.label : undefined}
                 aria-label={collapsed ? item.label : undefined}
