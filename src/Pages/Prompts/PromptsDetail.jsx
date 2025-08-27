@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import DuplicatePromptModal from './DuplicatePromptModal.jsx';
 import { fetchPromptVersions } from './PromptsDetailApi.js';
+import NewExperimentModal from './NewExperimentModal'; // NewExperimentModal import
 
 // --- 메인 컴포넌트 ---
 export default function PromptsDetail() {
@@ -30,12 +31,11 @@ export default function PromptsDetail() {
   const [activeDetailTab, setActiveDetailTab] = useState('Prompt');
   const [allPromptNames, setAllPromptNames] = useState([]);
   const [isDuplicateModalOpen, setDuplicateModalOpen] = useState(false);
-
-  // [추가] Playground 드롭다운 메뉴의 열림/닫힘 상태를 관리하는 state입니다.
   const [isPlaygroundMenuOpen, setPlaygroundMenuOpen] = useState(false);
-  
-  // [추가] 드롭다운 메뉴 DOM 요소를 참조하기 위한 ref입니다. 메뉴 바깥 클릭 감지에 사용됩니다.
   const playgroundMenuRef = useRef(null);
+
+  // Experiment 모달의 열림/닫힘 상태를 관리
+  const [isExperimentModalOpen, setExperimentModalOpen] = useState(false);
 
   const loadPromptData = useCallback(async () => {
     if (!id) return;
@@ -45,7 +45,7 @@ export default function PromptsDetail() {
       const fetchedVersions = await fetchPromptVersions(id);
       setVersions(fetchedVersions);
       if (fetchedVersions.length > 0) {
-        setSelectedVersion(fetchedVersions[0]); // 최신 버전을 기본으로 선택
+        setSelectedVersion(fetchedVersions[0]);
       }
     } catch (err) {
       console.error("Failed to fetch prompt details:", err);
@@ -59,16 +59,13 @@ export default function PromptsDetail() {
     loadPromptData();
   }, [loadPromptData]);
   
-  // [추가] 드롭다운 메뉴 바깥을 클릭했을 때 메뉴를 닫는 useEffect 훅입니다.
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (playgroundMenuRef.current && !playgroundMenuRef.current.contains(event.target)) {
         setPlaygroundMenuOpen(false);
       }
     };
-    // 이벤트 리스너 등록
     document.addEventListener('mousedown', handleClickOutside);
-    // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -153,6 +150,13 @@ export default function PromptsDetail() {
     });
     alert(`Prompt duplicated as "${newName}" (자세한 내용은 콘솔 확인)`);
     setDuplicateModalOpen(false);
+  };
+  
+  // Experiment 모달에서 'Create' 버튼을 눌렀을 때 실행될 함수
+  const handleRunExperiment = () => {
+    console.log("Create Experiment button clicked. Form data is in the modal.");
+    alert('실험 생성 요청이 콘솔에 기록되었습니다.');
+    setExperimentModalOpen(false);
   };
 
   if (isLoading) {
@@ -253,9 +257,7 @@ export default function PromptsDetail() {
               <button className={`${styles.detailTabButton} ${activeDetailTab === 'Use' ? styles.active : ''}`} onClick={() => setActiveDetailTab('Use')}>Use Prompt</button>
             </div>
             <div className={styles.detailActions}>
-              {/* [수정] 기존 button을 드롭다운 메뉴를 포함하는 div로 감싸줍니다. */}
               <div className={styles.playgroundDropdownContainer} ref={playgroundMenuRef}>
-                {/* 이 버튼은 이제 드롭다운 메뉴를 열고 닫는 역할만 합니다. */}
                 <button 
                   className={styles.playgroundButton} 
                   onClick={() => setPlaygroundMenuOpen(prev => !prev)}
@@ -263,10 +265,8 @@ export default function PromptsDetail() {
                   <Play size={14} /> Playground
                 </button>
 
-                {/* isPlaygroundMenuOpen이 true일 때만 드롭다운 메뉴를 보여줍니다. */}
                 {isPlaygroundMenuOpen && (
                   <div className={styles.playgroundDropdownMenu}>
-                    {/* [수정] 메뉴 아이템 텍스트를 변경하고, onClick 핸들러를 연결합니다. */}
                     <div className={styles.playgroundDropdownItem} onClick={handleGoToPlayground}>
                       Fresh playground
                     </div>
@@ -276,7 +276,12 @@ export default function PromptsDetail() {
                   </div>
                 )}
               </div>
-              <button className={styles.playgroundButton}>Experiment</button>
+              <button 
+                className={styles.playgroundButton}
+                onClick={() => setExperimentModalOpen(true)}
+              >
+                Experiment
+              </button>
               <button className={styles.iconButton}><MessageCircle size={16} /></button>
               <button className={styles.iconButton}><MoreVertical size={18} /></button>
             </div>
@@ -339,11 +344,18 @@ export default function PromptsDetail() {
           currentVersion={selectedVersion?.id || 0}
         />
       )}
+      {isExperimentModalOpen && (
+        <NewExperimentModal
+            isOpen={isExperimentModalOpen}
+            onClose={() => setExperimentModalOpen(false)}
+            onSubmit={handleRunExperiment}
+            promptName={id}
+            promptVersion={selectedVersion?.id}
+        />
+      )}
     </div>
   );
 }
-
-
 
 
 
