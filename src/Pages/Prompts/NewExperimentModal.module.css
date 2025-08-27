@@ -278,3 +278,45 @@
   background-color: #334155;
   color: #f1f5f9;
 }
+/* --- ▼▼▼ 이 코드를 NewExperimentModal.module.css 파일 맨 아래에 추가해주세요 ▼▼▼ --- */
+
+.modelNameContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* select와 버튼 사이 간격 */
+  flex-grow: 1;
+}
+
+.addConnectionButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 0 12px;
+  height: 38px; /* select 높이와 동일하게 설정 */
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap; /* 버튼 텍스트가 줄바꿈되지 않도록 */
+}
+
+.addConnectionButton:hover {
+  background-color: #334155;
+}
+
+
+
+
+/* --- ▼▼▼ 이 코드를 NewExperimentModal.module.css 파일 맨 아래에 추가해주세요 ▼▼▼ --- */
+
+.dropdownItem.disabled {
+  color: #94a3b8; /* 비활성화된 텍스트 색상 */
+  cursor: not-allowed;
+}
+
+.dropdownItem.disabled:hover {
+  background-color: transparent; /* 호버 효과 제거 */
+}
