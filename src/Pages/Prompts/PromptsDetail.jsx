@@ -280,7 +280,7 @@ export default function PromptsDetail() {
                 className={styles.playgroundButton}
                 onClick={() => setExperimentModalOpen(true)}
               >
-                Experiment
+                Dataset run
               </button>
               <button className={styles.iconButton}><MessageCircle size={16} /></button>
               <button className={styles.iconButton}><MoreVertical size={18} /></button>

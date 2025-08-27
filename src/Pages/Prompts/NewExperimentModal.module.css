@@ -1,4 +1,4 @@
-/* src/Pages/Prompts/NewExperimentModal.module.css */
+/* src/Pages/Prompts/NewExperimentModal.module.css (전체 코드) */
 
 .overlay {
   position: fixed;
@@ -81,7 +81,27 @@
   font-size: 13px;
 }
 
-.input, .textarea {
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formRow > label {
+  font-weight: 500;
+  color: #cbd5e1;
+  font-size: 13px;
+  flex-basis: 120px;
+  flex-shrink: 0;
+}
+
+.formRow > div {
+  flex: 1;
+}
+
+/* ▼▼▼ 여기부터 수정된 부분입니다 ▼▼▼ */
+.input, .textarea, .select, .selectButton {
   width: 100%;
   background-color: #1e293b;
   border: 1px solid #475569;
@@ -89,9 +109,15 @@
   padding: 8px 12px;
   color: #f1f5f9;
   font-size: 14px;
+  box-sizing: border-box; /* 높이 계산에 padding과 border를 포함시킵니다. */
 }
 
-.input:focus, .textarea:focus {
+/* 한 줄짜리 입력 필드들의 높이를 통일합니다. */
+.input, .select, .selectButton {
+  height: 38px;
+}
+
+.input:focus, .textarea:focus, .select:focus {
   outline: none;
   border-color: #38bdf8;
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
@@ -99,8 +125,9 @@
 
 .textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 60px; /* 기본 높이를 조금 줄입니다. */
 }
+/* ▲▲▲ 여기까지 수정된 부분입니다 ▲▲▲ */
 
 .section {
   margin-top: 24px;
@@ -112,12 +139,13 @@
   font-size: 14px;
   font-weight: 600;
   color: #f1f5f9;
-  margin: 0 0 12px;
+  margin: 0;
 }
 
 .inlineGroup {
   display: flex;
   gap: 12px;
+  margin-top: 16px; /* 제목과 입력창 사이 간격 추가 */
 }
 
 .selectWrapper {
@@ -126,13 +154,7 @@
 }
 
 .select {
-  width: 100%;
-  padding: 8px 32px 8px 12px;
-  background-color: #1e293b;
-  border: 1px solid #475569;
-  border-radius: 6px;
-  color: #f1f5f9;
-  font-size: 14px;
+  padding-right: 32px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -178,29 +200,14 @@
   background-color: #e2e8f0;
 }
 
-
-/* src/Pages/Prompts/NewExperimentModal.module.css */
-
-/* ... (기존 스타일은 그대로 둡니다) ... */
-
-
-/* ▼▼▼ 아래 내용을 파일 맨 끝에 추가해주세요 ▼▼▼ */
-
 .customSelectContainer {
   position: relative;
 }
 
 .selectButton {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  background-color: #1e293b;
-  border: 1px solid #475569;
-  border-radius: 6px;
-  color: #f1f5f9;
-  font-size: 14px;
   text-align: left;
   cursor: pointer;
 }
@@ -247,4 +254,27 @@
 
 .actionItem {
   color: #38bdf8;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.iconButton:hover {
+  background-color: #334155;
+  color: #f1f5f9;
 }

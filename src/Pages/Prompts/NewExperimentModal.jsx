@@ -1,6 +1,8 @@
+// src/Pages/Prompts/NewExperimentModal.jsx (전체 코드)
+
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './NewExperimentModal.module.css';
-import { X, ChevronDown, Check } from 'lucide-react';
+import { X, ChevronDown, Check, ExternalLink } from 'lucide-react';
 import { fetchAllPromptNames, fetchVersionsForPrompt, fetchLlmConnections } from './NewExperimentModalApi';
 import NewLlmConnectionModal from '../Playground/NewLlmConnectionModal';
 
@@ -99,9 +101,9 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.header}>
             <div>
-              <h2 className={styles.title}>New Prompt Experiment</h2>
+              <h2 className={styles.title}>New Dataset Run</h2>
               <p className={styles.subtitle}>
-                Create an experiment to test a prompt version on a dataset. 
+                Create a dataset run to test a prompt version on a dataset.
                 <a href="#" className={styles.docLink}>See documentation</a> to learn more.
               </p>
             </div>
@@ -110,6 +112,7 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
             </button>
           </div>
           <div className={styles.body}>
+            {/* Experiment name과 Description은 다시 원래의 formGroup을 사용 */}
             <div className={styles.formGroup}>
               <label htmlFor="experiment-name">Experiment name (optional)</label>
               <input
@@ -137,9 +140,9 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               <h3 className={styles.sectionTitle}>Prompt</h3>
               <div className={styles.inlineGroup}>
                 <div className={styles.selectWrapper} style={{ flex: 2 }}>
-                  <select 
-                    className={styles.select} 
-                    value={selectedPrompt} 
+                  <select
+                    className={styles.select}
+                    value={selectedPrompt}
                     onChange={handlePromptChange}
                   >
                     {allPrompts.map(p => <option key={p} value={p}>{p}</option>)}
@@ -147,9 +150,9 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
                   <ChevronDown size={16} className={styles.selectIcon} />
                 </div>
                 <div className={styles.selectWrapper} style={{ flex: 1 }}>
-                  <select 
-                    className={styles.select} 
-                    value={selectedVersion} 
+                  <select
+                    className={styles.select}
+                    value={selectedVersion}
                     onChange={handleVersionChange}
                     disabled={availableVersions.length === 0}
                   >
@@ -161,12 +164,19 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
             </div>
 
             <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Model</h3>
-              <div className={styles.formGroup}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>Model</h3>
+                <a href="/settings/llm-connections" target="_blank" rel="noopener noreferrer" className={styles.iconButton} title="Go to LLM Connections">
+                  <ExternalLink size={16} />
+                </a>
+              </div>
+              
+              {/* Model 섹션 내부 div의 className을 formRow로 변경 */}
+              <div className={styles.formRow}>
                 <label>Provider</label>
                 <div className={styles.customSelectContainer} ref={providerRef}>
-                  <button 
-                    className={styles.selectButton} 
+                  <button
+                    className={styles.selectButton}
                     onClick={() => setProviderDropdownOpen(prev => !prev)}
                   >
                     <span>{selectedProviderObject?.adapter ?? selectedProviderObject?.id ?? "Select a provider"}</span>
@@ -175,9 +185,9 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
                   {isProviderDropdownOpen && (
                     <div className={styles.dropdownMenu}>
                       {providers.map(p => (
-                        <div 
-                          key={p.id} 
-                          className={styles.dropdownItem} 
+                        <div
+                          key={p.id}
+                          className={styles.dropdownItem}
                           onClick={() => {
                             setSelectedProvider(p.id);
                             setProviderDropdownOpen(false);
@@ -188,7 +198,7 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
                         </div>
                       ))}
                       <div className={styles.dropdownDivider}></div>
-                      <div 
+                      <div
                         className={`${styles.dropdownItem} ${styles.actionItem}`}
                         onClick={() => {
                           setIsLlmModalOpen(true);
@@ -201,7 +211,8 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
                   )}
                 </div>
               </div>
-              <div className={styles.formGroup}>
+
+              <div className={styles.formRow}>
                 <label>Model name</label>
                 <div className={styles.selectWrapper}>
                   <select className={styles.select} defaultValue={selectedProviderObject?.modelName ?? ""}>
