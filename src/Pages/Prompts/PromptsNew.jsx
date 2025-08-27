@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styles from './PromptsNew.module.css';
 import { Book } from 'lucide-react';
@@ -8,6 +8,13 @@ import LineNumberedTextarea from '../../components/LineNumberedTextarea/LineNumb
 import FormPageLayout from '../../components/Layouts/FormPageLayout.jsx';
 import FormGroup from '../../components/Form/FormGroup.jsx';
 import { createPromptOrVersion } from './PromptsNewApi.js';
+
+// LineNumberedTextarea needs to be wrapped with forwardRef to accept a ref.
+// Make sure this change is applied in the actual component file.
+const ForwardedLineNumberedTextarea = React.forwardRef((props, ref) => (
+    <LineNumberedTextarea {...props} forwardedRef={ref} />
+));
+
 
 const PromptsNew = () => {
     const navigate = useNavigate();
@@ -21,11 +28,12 @@ const PromptsNew = () => {
     ]);
     const [textContent, setTextContent] = useState(initialState.textContent || '');
     const [config, setConfig] = useState(initialState.config || '{\n  "temperature": 1\n}');
-    const [labels, setLabels] = useState({ production: false });
+    const [labels, setLabels] = useState(initialState.labels || { production: true }); // Default to true for better UX
     const [commitMessage, setCommitMessage] = useState('');
     const [isReferenceModalOpen, setIsReferenceModalOpen] = useState(false);
     const [variables, setVariables] = useState([]);
     const isNewVersionMode = initialState.isNewVersion || false;
+    const textPromptRef = useRef(null);
 
 
     useEffect(() => {
@@ -52,14 +60,20 @@ const PromptsNew = () => {
         setLabels((prev) => ({ ...prev, [name]: checked }));
     };
 
-    const handleInsertReference = (promptId) => {
-        const referenceText = `{{@ ${promptId} }}`;
+    const handleInsertReference = (referenceTag) => {
         if (promptType === 'Text') {
-            setTextContent((prev) => prev + referenceText);
+            setTextContent((prev) => prev + referenceTag);
         } else {
-            alert(`Please manually insert ${referenceText} into the desired message.`);
+            // Chat 모드일 경우, 태그를 클립보드에 복사하고 안내 메시지를 표시합니다.
+            navigator.clipboard.writeText(referenceTag).then(() => {
+                alert(`Reference tag copied to clipboard. Please paste it into the desired message.\n\nCopied: ${referenceTag}`);
+            }).catch(err => {
+                console.error("클립보드 복사 실패:", err);
+                alert("클립보드 복사에 실패했습니다. 수동으로 복사해주세요.");
+            });
         }
     };
+
     
     const handleSave = async () => {
         try {
@@ -73,15 +87,14 @@ const PromptsNew = () => {
                 commitMessage,
             });
 
-            alert(`'${promptName}' 프롬프트의 새 버전이 성공적으로 저장되었습니다.`);
+            alert(`'${promptName}' prompt's new version has been saved successfully.`);
             navigate(`/prompts/${promptName}`);
         } catch (err) {
             console.error("Failed to save prompt:", err);
-            // AxiosError is not available in JS, so we check for response property
             if (err.response) {
-                alert(`프롬프트 저장에 실패했습니다: ${err.response?.data?.message || err.message}`);
+                alert(`Failed to save prompt: ${err.response?.data?.message || err.message}`);
             } else {
-                alert(`프롬프트 저장에 실패했습니다: ${String(err)}`);
+                alert(`Failed to save prompt: ${String(err)}`);
             }
         }
     };
@@ -136,22 +149,22 @@ const PromptsNew = () => {
                         <button className={`${styles.typeButton} ${promptType === 'Chat' ? styles.active : ''}`} onClick={() => setPromptType('Chat')}>Chat</button>
                         <button className={`${styles.typeButton} ${promptType === 'Text' ? styles.active : ''}`} onClick={() => setPromptType('Text')}>Text</button>
                     </div>
-                    {promptType === 'Text' && (
-                        <button className={styles.addReferenceButton} onClick={() => setIsReferenceModalOpen(true)}>+ Add prompt reference</button>
-                    )}
+                    {/* This button was misplaced in the original code. It should be outside the textarea. */}
+                     <button className={styles.addReferenceButton} onClick={() => setIsReferenceModalOpen(true)}>
+                         + Add prompt reference
+                     </button>
                 </div>
-                {promptType === 'Chat' ? (
-                    <ChatBox messages={chatContent} setMessages={setChatContent} />
-                ) : (
-                    <LineNumberedTextarea
+                {promptType === 'Text' ? (
+                    <ForwardedLineNumberedTextarea
                         id="prompt-content"
                         value={textContent}
                         onChange={(e) => setTextContent(e.target.value)}
                         placeholder='Enter your text prompt here, e.g. "Summarize this: {{text}}"'
                         minHeight={200}
-                    >
-                         <button className={styles.addReferenceButtonInEditor} onClick={() => setIsReferenceModalOpen(true)}>+ Add prompt reference</button>
-                    </LineNumberedTextarea>
+                        ref={textPromptRef} // Pass ref here
+                    />
+                ) : (
+                    <ChatBox messages={chatContent} setMessages={setChatContent} />
                 )}
                 {variables.length > 0 && (
                     <div className={styles.variablesContainer}>

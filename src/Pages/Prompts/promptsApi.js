@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { langfuse } from 'lib/langfuse';
 
 const PROJECT_ID = "cmetj3c160006qp07r33bizpj"; // ⚠️ 프로젝트 ID를 한 곳에서 관리
 
@@ -41,7 +42,54 @@ export const fetchPrompts = async () => {
     throw new Error(error.response?.data?.error?.message || "Failed to fetch prompts.");
   }
 };
+// ========================= 추가 ===============================
+/**
+ * 인라인 참조에 사용할 수 있는 텍스트 프롬프트 목록을 가져옵니다.
+ * @returns {Promise<Array<{id: string, name: string}>>}
+ */
+export const fetchPromptLinkOptions = async () => {
+  try {
+    // TODO: 현재 프로젝트 ID를 동적으로 가져와야 합니다.
+    // 우선 제공해주신 네트워크 로그에 있는 ID를 임시로 사용합니다.
+    const projectId = PROJECT_ID; 
 
+    const input = {
+      json: { projectId },
+    };
+
+    const url = `/api/trpc/prompts.getPromptLinkOptions?input=${encodeURIComponent(JSON.stringify(input))}`;
+
+    // 'credentials: "include"' 옵션을 추가하여 인증 쿠키를 함께 전송합니다.
+    const response = await fetch(url, {
+      credentials: 'include', // ★★★ 이 옵션이 핵심입니다!
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const prompts = data.result?.data?.json;
+
+    if (!Array.isArray(prompts)) {
+      console.error("API response is not an array:", data);
+      return [];
+    }
+    
+    return prompts;
+    // return prompts.map(prompt => ({
+    //   id: prompt.name,
+    //   name: prompt.name,
+    // }));
+
+  } catch (error) {
+    console.error("Failed to fetch prompt link options:", error);
+    return [];
+  }
+};
+
+// ========================= 추가 =================================
 /**
  * [tRPC] 특정 프롬프트의 모든 버전 정보를 가져옵니다. (상세 페이지용)
  */
