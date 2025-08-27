@@ -1,15 +1,8 @@
-import { langfuse } from 'lib/langfuse';
+import axios from 'axios';
 
+const PROJECT_ID = "cmetj3c160006qp07r33bizpj"
 /**
- * 새로운 프롬프트를 생성하거나 기존 프롬프트의 새 버전을 생성합니다.
- * @param {object} params - 프롬프트 생성에 필요한 데이터
- * @param {string} params.promptName
- * @param {'Chat' | 'Text'} params.promptType
- * @param {Array<object>} params.chatContent
- * @param {string} params.textContent
- * @param {string} params.config - JSON string
- * @param {object} params.labels
- * @param {string} params.commitMessage
+ * [tRPC] 새로운 프롬프트를 생성하거나 새 버전을 만듭니다.
  */
 export const createPromptOrVersion = async (params) => {
   const {
@@ -18,43 +11,44 @@ export const createPromptOrVersion = async (params) => {
     chatContent,
     textContent,
     config,
-    labels,
+    labels, // { production: true/false } 형태의 객체
     commitMessage,
   } = params;
 
-  // 활성화된 레이블만 문자열 배열로 변환합니다.
+  // 1. 활성화된 라벨만 문자열 배열로 변환합니다. (e.g., ["production"] 또는 [])
   const activeLabels = Object.entries(labels)
     .filter(([, isActive]) => isActive)
     .map(([label]) => label);
-  
-  // 공통 요청 본문을 정의합니다.
-  const commonPayload = {
-    name: promptName,
-    config: JSON.parse(config),
-    labels: activeLabels,
-    commitMessage: commitMessage || null,
+
+  // 2. API가 요구하는 payload 형식에 맞게 데이터를 구성합니다.
+  const payload = {
+    json: {
+      projectId: PROJECT_ID, // ⚠️ 이 부분은 나중에 동적으로 가져와야 합니다.
+      name: promptName,
+      type: promptType.toLowerCase(), // 'Chat' -> 'chat'
+      // Chat 타입일 경우와 Text 타입일 경우를 구분하여 prompt 데이터 구성
+      prompt: promptType === 'Text'
+        ? textContent
+        : chatContent
+            .filter(msg => msg.role !== 'Placeholder')
+            .map(({ role, content }) => ({ role: role.toLowerCase(), content: content || '' })),
+      config: JSON.parse(config),
+      labels: activeLabels,
+      commitMessage: commitMessage || null,
+    },
+    meta: {
+      values: {
+        commitMessage: ["undefined"]
+      }
+    }
   };
 
-  // 프롬프트 타입에 따라 요청을 분기합니다.
-  if (promptType === 'Chat') {
-    const chatPromptData = chatContent
-      .filter(msg => msg.role !== 'Placeholder')
-      .map(({ role, content }) => ({
-        type: 'chatmessage',
-        role: role.toLowerCase(),
-        content,
-      }));
-
-    await langfuse.api.promptsCreate({
-      ...commonPayload,
-      type: 'chat',
-      prompt: chatPromptData,
-    });
-  } else { // 'Text'
-    await langfuse.api.promptsCreate({
-      ...commonPayload,
-      type: 'text',
-      prompt: textContent,
-    });
+  // 3. 안정적인 tRPC API를 직접 호출합니다.
+  try {
+    // prompts.create API를 사용하여 새 프롬프트 또는 버전을 생성합니다.
+    await axios.post('/api/trpc/prompts.create', payload);
+  } catch (error) {
+    console.error("Failed to create prompt via tRPC:", error);
+    throw new Error(error.response?.data?.error?.message || "Failed to create prompt.");
   }
 };

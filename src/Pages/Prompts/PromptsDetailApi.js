@@ -6,7 +6,10 @@ import { langfuse } from 'lib/langfuse';
  * @returns {Promise<Array<Object>>} UI에 표시될 버전 정보 배열
  */
 export const fetchPromptVersions = async (promptName) => {
-    const response = await langfuse.api.promptsGet({ promptName });
+    const response = await langfuse.api.promptsGet({ 
+      promptName, 
+      label: "latest"
+    });
     
     const versionsResponse = response ? [response] : [];
     const isChatPrompt = (prompt) => Array.isArray(prompt);
