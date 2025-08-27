@@ -1,34 +1,138 @@
-
-
-
 import { langfuse } from 'lib/langfuse';
-
-// --- API 함수 ---
+import axios from 'axios';
 
 /**
- * 프롬프트 목록 전체를 가져오고, 각 프롬프트의 최신 버전 정보와 타입을 포함합니다.
- * @returns {Promise<Array<Object>>} UI에 표시될 프롬프트 목록
+ * [안정화 버전] 프롬프트 목록 전체를 가져옵니다.
+ * 이 버전은 SDK 대신 안정적인 tRPC API를 직접 호출하여 숫자 이름 등 모든 경우에 동작합니다.
  */
 export const fetchPrompts = async () => {
-  // 1. 모든 프롬프트의 기본 목록(이름 위주)을 가져옵니다.
-  const listResponse = await langfuse.api.promptsList({});
-  
-  // 2. 각 프롬프트의 상세 정보를 병렬로 조회합니다.
-  const detailedPrompts = await Promise.all(
-    listResponse.data.map(promptInfo => 
-      langfuse.api.promptsGet({ promptName: promptInfo.name })
-    )
-  );
+  try {
+    const projectId = "cmei859qe0006md08gdckbscu"; // 이 부분은 동적으로 가져오도록 개선하는 것이 좋습니다.
+    // ▼▼▼ API가 요구하는 모든 파라미터를 포함하도록 수정 ▼▼▼
+    const params = {
+      json: {
+        projectId: projectId,
+        page: 0,
+        limit: 50,
+        filter: [], // 필수: 필터 배열 추가
+        orderBy: { column: "createdAt", order: "DESC" },
+        searchQuery: null, // 필수: 검색어 추가
+      },
+      meta: {
+        values: {
+          searchQuery: ["undefined"]
+        }
+      }
+    };
+    // ▲▲▲ 여기까지 수정 ▲▲▲
 
-  // 3. 상세 정보가 포함된 데이터를 UI 표시용 형태로 가공합니다.
-  return detailedPrompts.map((prompt) => ({
-    id: prompt.name,
-    name: prompt.name,
-    versions: prompt.version, // API에서 받은 최신 버전 번호를 사용합니다.
-    type: prompt.type,       // API에서 받은 프롬프트 타입을 사용합니다.
-    observations: 0, // 이 정보는 현재 API에서 제공되지 않으므로 0으로 유지합니다.
-    latestVersionCreatedAt: new Date(prompt.updatedAt).toLocaleString(), // 업데이트된 시간을 보기 좋게 포맷합니다.
-    tags: prompt.tags || [],
-  }));
+    const url = `/api/trpc/prompts.all?input=${encodeURIComponent(JSON.stringify(params))}`;
+    const response = await axios.get(url);
+
+    // tRPC 응답 구조에 맞게 실제 데이터 경로를 반환합니다.
+    const promptsFromServer = response.data.result.data.json.prompts;
+
+    return promptsFromServer.map((prompt) => ({
+      id: prompt.name,
+      name: prompt.name,
+      versions: prompt.version,
+      type: prompt.type,
+      observations: 0,
+      latestVersionCreatedAt: new Date(prompt.createdAt).toLocaleString(),
+      tags: prompt.tags || [],
+    }));
+
+  } catch (error) {
+    console.error("Failed to fetch prompts via tRPC:", error);
+    throw new Error(error.response?.data?.error?.message || "Failed to fetch prompts.");
+  }
 };
 
+// --- [삭제 기능] ---
+
+const getAllPromptVersions = async (promptName, projectId) => {
+  const params = { json: { name: promptName, projectId } };
+  const url = `/api/trpc/prompts.allVersions?input=${encodeURIComponent(JSON.stringify(params))}`;
+  const response = await axios.get(url);
+  return response.data.result.data.json.promptVersions;
+};
+
+const deletePromptVersion = async (promptVersionId, projectId) => {
+  await axios.post('/api/trpc/prompts.deleteVersion', {
+    json: {
+      promptVersionId,
+      projectId,
+    },
+  });
+};
+
+export const deletePrompt = async (promptName) => {
+  try {
+    const projectId = "cmei859qe0006md08gdckbscu";
+    const versions = await getAllPromptVersions(promptName, projectId);
+    if (versions.length === 0) return;
+    await Promise.all(
+      versions.map(version => deletePromptVersion(version.id, projectId))
+    );
+  } catch (error) {
+    console.error(`Failed to delete prompt ${promptName}:`, error);
+    const errorMessage = error.response?.data?.error?.message || `Failed to delete prompt '${promptName}'.`;
+    throw new Error(errorMessage);
+  }
+};
+
+// --- 프롬프트 상세 페이지 및 생성 관련 함수들 ---
+// 이 함수들은 SDK를 사용해도 큰 문제가 없으므로 그대로 둡니다.
+export const fetchPromptVersions = async (promptName) => {
+    const response = await langfuse.api.promptsGet({ promptName });
+    // ... (기존 코드와 동일)
+    const versionsResponse = response ? [response] : [];
+    const isChatPrompt = (prompt) => Array.isArray(prompt);
+
+    return versionsResponse.map((v) => {
+      const pythonCode = `from langfuse import Langfuse
+
+    # Initialize langfuse client
+    langfuse = Langfuse()
+
+    # Get production prompt
+    prompt = langfuse.get_prompt("${v.name}")
+
+    # Get by Label
+    # You can use as many labels as you'd like to identify different deployment targets
+    prompt = langfuse.get_prompt("${v.name}", label="latest")
+
+    # Get by version number, usually not recommended as it requires code changes to deploy new prompt versions
+    langfuse.get_prompt("${v.name}", version=${v.version})`;
+      const jsTsCode = `import { Langfuse } from "langfuse";
+
+    // Initialize the langfuse client
+    const langfuse = new Langfuse();
+
+    // Get production prompt
+    const prompt = await langfuse.getPrompt("${v.name}");
+
+    // Get by Label
+    # You can use as many labels as you'd like to identify different deployment targets
+    const prompt = await langfuse.getPrompt("${v.name}", { label: "latest" });
+
+    # Get by version number, usually not recommended as it requires code changes to deploy new prompt versions
+    langfuse.getPrompt("${v.name}", { version: ${v.version} });`;
+
+        return {
+            id: v.version,
+            label: v.commitMessage || `Version ${v.version}`,
+            labels: v.labels,
+            details: v.updatedAt ? new Date(v.updatedAt).toLocaleString() : 'N/A',
+            author: v.createdBy,
+            prompt: {
+                user: isChatPrompt(v.prompt) ? v.prompt.find(p => p.role === 'user')?.content ?? '' : v.prompt,
+                system: isChatPrompt(v.prompt) ? v.prompt.find(p => p.role === 'system')?.content : undefined,
+            },
+            config: v.config,
+            useprompts: { python: pythonCode, jsTs: jsTsCode },
+            tags: v.tags,
+            commitMessage: v.commitMessage,
+        };
+    }).sort((a, b) => b.id - a.id);
+};
