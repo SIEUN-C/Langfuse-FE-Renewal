@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import styles from './ChatBox.module.css';
@@ -38,86 +38,31 @@ const ChatMessageRow = ({ msg, index, moveMessage, handleMessageChange, handleRe
     
     preview(drop(ref));
 
-    // Placeholder일 경우와 아닐 경우 다른 UI를 렌더링합니다.
-    const isPlaceholder = msg.role === 'Placeholder';
-
     return (
         <div ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }} className={styles.messageRow}>
             <div ref={drag} className={styles.dragHandleWrapper}>
                 <GripVertical className={styles.dragHandle} size={18} />
             </div>
-            <div className={styles.roleCol}>
-                {isPlaceholder ? (
-                    <span className={styles.placeholderRole}>Placeholder</span>
-                ) : (
-                    <select className={styles.roleSelect} value={msg.role} onChange={(e) => handleMessageChange(msg.id, 'role', e.target.value)}>
-                        <option>System</option>
-                        <option>User</option>
-                        <option>Assistant</option>
-                    </select>
-                )}
-            </div>
-            <div className={styles.inputCol}>
-                {isPlaceholder ? (
-                     <input
-                        className={styles.placeholderInput}
-                        placeholder='Enter placeholder name (e.g., "msg_history") here.'
-                        value={msg.content}
-                        onChange={(e) => handleMessageChange(msg.id, 'content', e.target.value)}
-                    />
-                ) : (
-                    <textarea 
-                        className={styles.messageTextarea}
-                        placeholder={
-                            msg.role === "System"
-                                ? "Enter a system message here."
-                                : msg.role === "Assistant"
-                                    ? "Enter an assistant message here."
-                                    : "Enter a user message here."
-                        }
-                        value={msg.content} 
-                        onChange={(e) => handleMessageChange(msg.id, 'content', e.target.value)} 
-                        rows={1} 
-                    />
-                )}
-            </div>
-            <button className={styles.removeButton} onClick={() => handleRemoveMessage(msg.id)}>
-                <X size={16} />
-            </button>
+            {msg.role === 'Placeholder' ? (
+                <span className={styles.placeholderRole}>Placeholder</span>
+            ) : (
+                <select className={styles.roleSelect} value={msg.role} onChange={(e) => handleMessageChange(msg.id, 'role', e.target.value)}>
+                    <option>System</option>
+                    <option>User</option>
+                    <option>Developer</option>
+                    <option>Assistant</option>
+                </select>
+            )}
+            <textarea className={styles.messageTextarea} placeholder={msg.role === 'Placeholder' ? 'Enter placeholder content' : 'Enter a message'} value={msg.content} onChange={(e) => handleMessageChange(msg.id, 'content', e.target.value)} rows={1} />
+            <button className={styles.removeButton} onClick={() => handleRemoveMessage(msg.id)}><X size={16} /></button>
         </div>
     );
 };
 
-
 // 메인 ChatBox 컴포넌트
 const ChatBox = ({ messages, setMessages }) => {
-
-    // 초기 렌더링 시 기본 메시지 설정 (기존 로직 유지)
-    useEffect(() => {
-        if (!messages || messages.length === 0) {
-            const initRows = [
-                {
-                    id: Date.now(),
-                    role: "System",
-                    content: "You are a helpful assistant.",
-                },
-                {
-                    id: Date.now() + 1,
-                    role: "User",
-                    content: "",
-                },
-            ];
-            setMessages(initRows);
-        }
-    }, [messages, setMessages]);
-
-
     const handleAddMessage = () => {
-        // 마지막 메시지 역할을 기준으로 다음 역할을 추천하는 로직 (개선)
-        const lastMessage = messages[messages.length - 1];
-        const nextRole = (lastMessage && lastMessage.role === 'User') ? 'Assistant' : 'User';
-        
-        const newMessage = { id: Date.now(), role: nextRole, content: '' };
+        const newMessage = { id: Date.now(), role: 'User', content: '' };
         setMessages(prev => [...prev, newMessage]);
     };
 
@@ -149,7 +94,7 @@ const ChatBox = ({ messages, setMessages }) => {
     return (
         <DndProvider backend={HTML5Backend}>
             <div className={styles.chatEditor}>
-                {messages && messages.map((msg, index) => (
+                {messages.map((msg, index) => (
                     <ChatMessageRow
                         key={msg.id}
                         index={index}

@@ -1,41 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './NewExperimentModal.module.css';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { fetchAllPromptNames, fetchVersionsForPrompt } from './NewExperimentModalApi';
+import { fetchAllPromptNames, fetchVersionsForPrompt, fetchLlmConnections } from './NewExperimentModalApi';
 import NewLlmConnectionModal from '../Playground/NewLlmConnectionModal';
 
 const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersion }) => {
-  // --- 필드 state ---
   const [experimentName, setExperimentName] = useState('');
   const [description, setDescription] = useState('');
-  
-  // --- Prompt 드롭다운 state ---
-  const [allPrompts, setAllPrompts] = useState([]); 
-  const [availableVersions, setAvailableVersions] = useState([]); 
-  const [selectedPrompt, setSelectedPrompt] = useState(promptName); 
-  const [selectedVersion, setSelectedVersion] = useState(promptVersion); 
-  
-  // --- Model 드롭다운 state ---
-  const [providers] = useState(['test', 'openai']); // 임시 데이터
-  const [selectedProvider, setSelectedProvider] = useState(providers[0]);
+  const [allPrompts, setAllPrompts] = useState([]);
+  const [availableVersions, setAvailableVersions] = useState([]);
+  const [selectedPrompt, setSelectedPrompt] = useState(promptName);
+  const [selectedVersion, setSelectedVersion] = useState(promptVersion);
+
+  const [providers, setProviders] = useState([]);
+  const [selectedProvider, setSelectedProvider] = useState('');
   const [isProviderDropdownOpen, setProviderDropdownOpen] = useState(false);
   const providerRef = useRef(null);
-  
-  // --- LLM 연결 모달 state ---
+
   const [isLlmModalOpen, setIsLlmModalOpen] = useState(false);
 
-  // --- 나머지 임시 데이터 ---
   const [models] = useState(['Qwen3-30B-A3B-Instruct-2507-UD', 'gpt-4']);
   const [datasets] = useState(['Select a dataset', 'dataset-1', 'dataset-2']);
 
-  // 모달이 열릴 때 모든 프롬프트 목록을 불러오고 필드를 초기화
   useEffect(() => {
     if (isOpen) {
-      const loadAllPrompts = async () => {
-        const names = await fetchAllPromptNames();
-        setAllPrompts(names);
+      const loadInitialData = async () => {
+        const [promptNames, connections] = await Promise.all([
+          fetchAllPromptNames(),
+          fetchLlmConnections()
+        ]);
+        setAllPrompts(promptNames);
+        setProviders(connections);
+
+        if (connections.length > 0) {
+          setSelectedProvider(connections[0].id);
+        }
       };
-      loadAllPrompts();
+      loadInitialData();
+      
       setExperimentName('');
       setDescription('');
       setSelectedPrompt(promptName);
@@ -43,7 +45,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
     }
   }, [isOpen, promptName, promptVersion]);
 
-  // 선택된 프롬프트가 바뀔 때마다 버전 목록을 다시 불러옴
   useEffect(() => {
     if (selectedPrompt) {
       const loadVersions = async () => {
@@ -57,7 +58,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
     }
   }, [selectedPrompt, selectedVersion]);
 
-  // Provider 드롭다운 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (providerRef.current && !providerRef.current.contains(event.target)) {
@@ -78,7 +78,7 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
       description,
       prompt: selectedPrompt,
       version: selectedVersion,
-      provider: selectedProvider,
+      providerId: selectedProvider,
     });
     onSubmit();
   };
@@ -90,6 +90,8 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
   const handleVersionChange = (e) => {
     setSelectedVersion(Number(e.target.value));
   };
+
+  const selectedProviderObject = providers.find(p => p.id === selectedProvider);
 
   return (
     <>
@@ -108,7 +110,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
             </button>
           </div>
           <div className={styles.body}>
-            {/* [복원] Experiment name 입력 필드 */}
             <div className={styles.formGroup}>
               <label htmlFor="experiment-name">Experiment name (optional)</label>
               <input
@@ -120,7 +121,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               />
             </div>
 
-            {/* [복원] Description 입력 필드 */}
             <div className={styles.formGroup}>
               <label htmlFor="description">Description (optional)</label>
               <textarea
@@ -133,7 +133,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               />
             </div>
 
-            {/* [복원] Prompt 섹션 */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Prompt</h3>
               <div className={styles.inlineGroup}>
@@ -161,7 +160,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               </div>
             </div>
 
-            {/* [수정 완료] Model 섹션 (커스텀 드롭다운 포함) */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Model</h3>
               <div className={styles.formGroup}>
@@ -171,22 +169,22 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
                     className={styles.selectButton} 
                     onClick={() => setProviderDropdownOpen(prev => !prev)}
                   >
-                    <span>{selectedProvider}</span>
+                    <span>{selectedProviderObject?.adapter ?? selectedProviderObject?.id ?? "Select a provider"}</span>
                     <ChevronDown size={16} className={styles.selectIcon} />
                   </button>
                   {isProviderDropdownOpen && (
                     <div className={styles.dropdownMenu}>
                       {providers.map(p => (
                         <div 
-                          key={p} 
+                          key={p.id} 
                           className={styles.dropdownItem} 
                           onClick={() => {
-                            setSelectedProvider(p);
+                            setSelectedProvider(p.id);
                             setProviderDropdownOpen(false);
                           }}
                         >
-                          {p}
-                          {selectedProvider === p && <Check size={16} />}
+                          {p.adapter ?? p.id}
+                          {selectedProvider === p.id && <Check size={16} />}
                         </div>
                       ))}
                       <div className={styles.dropdownDivider}></div>
@@ -206,7 +204,7 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               <div className={styles.formGroup}>
                 <label>Model name</label>
                 <div className={styles.selectWrapper}>
-                  <select className={styles.select}>
+                  <select className={styles.select} defaultValue={selectedProviderObject?.modelName ?? ""}>
                     {models.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
                   <ChevronDown size={16} className={styles.selectIcon} />
@@ -214,7 +212,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               </div>
             </div>
 
-            {/* [복원] Dataset 섹션 */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Dataset (expected columns)</h3>
               <div className={styles.selectWrapper}>
@@ -225,7 +222,6 @@ const NewExperimentModal = ({ isOpen, onClose, onSubmit, promptName, promptVersi
               </div>
             </div>
 
-            {/* [복원] Evaluators 섹션 */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Evaluators</h3>
               <p className={styles.evaluatorInfo}>Select a dataset first to set up evaluators.</p>

@@ -99,6 +99,16 @@
   gap: 8px;
 }
 
+/* ▼▼▼ 즐겨찾기 아이콘 스타일 추가 ▼▼▼ */
+.starIcon {
+  color: #64748b;
+  cursor: pointer;
+}
+.favorited {
+  color: #facc15;
+  fill: #facc15;
+}
+
 .clickableRow {
  cursor: pointer;
  border-top: 1px solid transparent;

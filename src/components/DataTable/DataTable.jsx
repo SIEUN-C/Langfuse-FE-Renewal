@@ -1,5 +1,4 @@
 // src/components/DataTable/DataTable.jsx
-
 import React from 'react';
 import styles from './DataTable.module.css';
 import {
@@ -8,6 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  Star,
+  Trash2,
 } from 'lucide-react';
 
 export function DataTable({
@@ -17,19 +18,62 @@ export function DataTable({
   keyField,
   selectedRowKey,
   onRowClick,
-  showActions = true, // 기본값을 true로 설정
+  showCheckbox = false,
+  onCheckboxChange,
+  selectedRows = new Set(),
+  showFavorite = true, // 기본값을 true로 변경
+  onFavoriteClick,
+  favoriteState = {},
+  onToggleAllFavorites, // 전체 토글 함수 prop 추가
+  showDelete = false,
+  onDeleteClick,
 }) {
+  const allChecked = data.length > 0 && data.every(row => selectedRows.has(row[keyField]));
+  const allFavorited = data.length > 0 && data.every(row => favoriteState[row[keyField]]);
+
+  const handleAllCheckboxChange = (e) => {
+    const newSelectedRows = new Set();
+    if (e.target.checked) {
+      data.forEach(row => newSelectedRows.add(row[keyField]));
+    }
+    onCheckboxChange(newSelectedRows);
+  };
+
+  const handleRowCheckboxChange = (rowId) => {
+    const newSelectedRows = new Set(selectedRows);
+    if (newSelectedRows.has(rowId)) {
+      newSelectedRows.delete(rowId);
+    } else {
+      newSelectedRows.add(rowId);
+    }
+    onCheckboxChange(newSelectedRows);
+  };
+
   return (
     <>
       <div className={styles.tableContainer}>
         <table className={styles.table}>
           <thead>
             <tr>
+              {showCheckbox && (
+                <th>
+                  <input type="checkbox" checked={allChecked} onChange={handleAllCheckboxChange} />
+                </th>
+              )}
+              {showFavorite && (
+                <th>
+                  <Star
+                    size={16}
+                    className={`${styles.starIcon} ${allFavorited ? styles.favorited : ''}`}
+                    onClick={onToggleAllFavorites}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
+              )}
               {columns.map((col, index) => (
                 <th key={index}>{col.header}</th>
               ))}
-              {/* showActions가 true일 때만 Actions 헤더를 렌더링 */}
-              {showActions && <th>Actions</th>}
+              {showDelete && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -44,18 +88,44 @@ export function DataTable({
                     onClick={() => onRowClick?.(row)}
                     className={`${onRowClick ? styles.clickableRow : ''} ${isSelected ? styles.selectedRow : ''}`}
                   >
+                    {showCheckbox && (
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.has(rowKey)}
+                          onChange={() => handleRowCheckboxChange(rowKey)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </td>
+                    )}
+                    {showFavorite && (
+                      <td>
+                        <Star
+                          size={16}
+                          className={`${styles.starIcon} ${favoriteState[rowKey] ? styles.favorited : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onFavoriteClick(rowKey);
+                          }}
+                        />
+                      </td>
+                    )}
                     {columns.map((col, index) => (
                       <td key={index}>
-                        {/* accessor가 존재할 때만 함수를 호출하도록 수정합니다. */}
                         {col.accessor ? col.accessor(row) : null}
                       </td>
                     ))}
-                    {/* showActions가 true일 때만 Actions 셀을 렌더링 */}
-                    {showActions && (
+                    {showDelete && (
                       <td>
                         <div className={styles.actionsCell}>
-                          <button className={styles.iconButton}>
-                            <MoreVertical size={16} />
+                          <button
+                            className={styles.iconButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteClick(rowKey);
+                            }}
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -65,8 +135,7 @@ export function DataTable({
               })
             ) : (
               <tr>
-                {/* colSpan도 showActions 값에 따라 동적으로 계산 */}
-                <td colSpan={columns.length + (showActions ? 1 : 0)} className={styles.emptyCell}>
+                <td colSpan={columns.length + (showCheckbox ? 1 : 0) + (showFavorite ? 1 : 0) + (showDelete ? 1 : 0)} className={styles.emptyCell}>
                   {renderEmptyState()}
                 </td>
               </tr>
