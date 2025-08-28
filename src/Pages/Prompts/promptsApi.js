@@ -61,7 +61,7 @@ export const fetchPromptLinkOptions = async () => {
 
     // 'credentials: "include"' 옵션을 추가하여 인증 쿠키를 함께 전송합니다.
     const response = await fetch(url, {
-      credentials: 'include', // ★★★ 이 옵션이 핵심입니다!
+      credentials: 'include',
     });
 
     if (!response.ok) {

@@ -24,7 +24,7 @@ const PromptsNew = () => {
     const [promptName, setPromptName] = useState(initialState.promptName || '');
     const [promptType, setPromptType] = useState(initialState.promptType || 'Chat');
     const [chatContent, setChatContent] = useState(initialState.chatContent || [
-        { id: Date.now(), role: 'System', content: 'You are a helpful assistant.' },
+        { id: Date.now(), role: 'System', content: '' },
     ]);
     const [textContent, setTextContent] = useState(initialState.textContent || '');
     const [config, setConfig] = useState(initialState.config || '{\n  "temperature": 1\n}');
