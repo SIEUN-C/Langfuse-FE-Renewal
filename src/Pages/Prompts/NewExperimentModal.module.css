@@ -320,3 +320,13 @@
 .dropdownItem.disabled:hover {
   background-color: transparent; /* 호버 효과 제거 */
 }
+
+
+--- ▼▼▼ 이전 답변에서 추가를 요청드렸던 코드입니다 ▼▼▼ ---
+
+/* '+ Add Connection' 옵션에 대한 스타일을 추가합니다. */
+.addConnectionOption {
+  font-style: italic;
+  color: #007bff; /* 원하는 색상으로 변경 가능 */
+  cursor: pointer;
+}
